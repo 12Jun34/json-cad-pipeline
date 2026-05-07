@@ -1,0 +1,750 @@
+# -*- coding: utf-8 -*-
+#|0
+
+import pythoncom
+from win32com.client import Dispatch, gencache
+
+import LDefin2D
+import MiscellaneousHelpers as MH
+
+PART_NAME = "papa_blocks"
+
+kompas6_constants = gencache.EnsureModule(
+    "{75C9F5D0-B5B8-4526-8681-9903C567D2ED}", 0, 1, 0
+).constants
+kompas6_constants_3d = gencache.EnsureModule(
+    "{2CAF168C-7961-4B90-9DA2-701419BEEFE3}", 0, 1, 0
+).constants
+
+kompas6_api5_module = gencache.EnsureModule(
+    "{0422828C-F174-495E-AC5D-D31014DBBE87}", 0, 1, 0
+)
+kompas_object = kompas6_api5_module.KompasObject(
+    Dispatch("Kompas.Application.5")._oleobj_.QueryInterface(
+        kompas6_api5_module.KompasObject.CLSID, pythoncom.IID_IDispatch
+    )
+)
+MH.iKompasObject = kompas_object
+
+kompas_api7_module = gencache.EnsureModule(
+    "{69AC2981-37C0-4379-84FD-5DD2F3C0A520}", 0, 1, 0
+)
+application = kompas_api7_module.IApplication(
+    Dispatch("Kompas.Application.7")._oleobj_.QueryInterface(
+        kompas_api7_module.IApplication.CLSID, pythoncom.IID_IDispatch
+    )
+)
+MH.iApplication = application
+
+Documents = application.Documents
+kompas_document = application.ActiveDocument
+kompas_document_3d = kompas_api7_module.IKompasDocument3D(kompas_document)
+iDocument3D = kompas_object.ActiveDocument3D()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(12, 0, 0, 0, 1)
+obj = iDocument2D.ksLineSeg(0, 0, 0, -100, 1)
+obj = iDocument2D.ksLineSeg(0, -100, 12, -100, 1)
+obj = iDocument2D.ksLineSeg(12, -100, 12, 0, 1)
+obj = iDocument2D.ksLineSeg(0, 0, 12, -100, 2)
+obj = iDocument2D.ksLineSeg(12, 0, 0, -100, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 6, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 10
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:1"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(60, 0, 48, 0, 1)
+obj = iDocument2D.ksLineSeg(48, 0, 48, -100, 1)
+obj = iDocument2D.ksLineSeg(48, -100, 60, -100, 1)
+obj = iDocument2D.ksLineSeg(60, -100, 60, 0, 1)
+obj = iDocument2D.ksLineSeg(48, 0, 60, -100, 2)
+obj = iDocument2D.ksLineSeg(60, 0, 48, -100, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 54, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 10
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:2"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(60, 0, 0, 0, 1)
+obj = iDocument2D.ksLineSeg(0, 0, 0, -12, 1)
+obj = iDocument2D.ksLineSeg(0, -12, 60, -12, 1)
+obj = iDocument2D.ksLineSeg(60, -12, 60, 0, 1)
+obj = iDocument2D.ksLineSeg(0, 0, 60, -12, 2)
+obj = iDocument2D.ksLineSeg(60, 0, 0, -12, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 30, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 10
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:3"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(94, -100, 106, -100, 1)
+obj = iDocument2D.ksLineSeg(106, -100, 130, 0, 1)
+obj = iDocument2D.ksLineSeg(130, 0, 118, 0, 1)
+obj = iDocument2D.ksLineSeg(118, 0, 94, -100, 1)
+obj = iDocument2D.ksLineSeg(94, -100, 130, 0, 2)
+obj = iDocument2D.ksLineSeg(106, -100, 118, 0, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 100, -100)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 20
+iExtrusionParam.depthReverse = 20
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:4"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(154, -100, 166, -100, 1)
+obj = iDocument2D.ksLineSeg(166, -100, 142, 0, 1)
+obj = iDocument2D.ksLineSeg(142, 0, 130, 0, 1)
+obj = iDocument2D.ksLineSeg(130, 0, 154, -100, 1)
+obj = iDocument2D.ksLineSeg(154, -100, 142, 0, 2)
+obj = iDocument2D.ksLineSeg(166, -100, 130, 0, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 160, -100)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 20
+iExtrusionParam.depthReverse = 20
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:5"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(148, -48, 112, -48, 1)
+obj = iDocument2D.ksLineSeg(112, -48, 112, -60, 1)
+obj = iDocument2D.ksLineSeg(112, -60, 148, -60, 1)
+obj = iDocument2D.ksLineSeg(148, -60, 148, -48, 1)
+obj = iDocument2D.ksLineSeg(112, -48, 148, -60, 2)
+obj = iDocument2D.ksLineSeg(148, -48, 112, -60, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 130, -48)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 20
+iExtrusionParam.depthReverse = 20
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:6"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(192, 0, 180, 0, 1)
+obj = iDocument2D.ksLineSeg(180, 0, 180, -100, 1)
+obj = iDocument2D.ksLineSeg(180, -100, 192, -100, 1)
+obj = iDocument2D.ksLineSeg(192, -100, 192, 0, 1)
+obj = iDocument2D.ksLineSeg(180, 0, 192, -100, 2)
+obj = iDocument2D.ksLineSeg(192, 0, 180, -100, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 186, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 10
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:7"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(240, 0, 228, 0, 1)
+obj = iDocument2D.ksLineSeg(228, 0, 228, -100, 1)
+obj = iDocument2D.ksLineSeg(228, -100, 240, -100, 1)
+obj = iDocument2D.ksLineSeg(240, -100, 240, 0, 1)
+obj = iDocument2D.ksLineSeg(228, 0, 240, -100, 2)
+obj = iDocument2D.ksLineSeg(240, 0, 228, -100, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 234, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 10
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:8"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(240, 0, 180, 0, 1)
+obj = iDocument2D.ksLineSeg(180, 0, 180, -12, 1)
+obj = iDocument2D.ksLineSeg(180, -12, 240, -12, 1)
+obj = iDocument2D.ksLineSeg(240, -12, 240, 0, 1)
+obj = iDocument2D.ksLineSeg(180, 0, 240, -12, 2)
+obj = iDocument2D.ksLineSeg(240, 0, 180, -12, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 210, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 10
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:9"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(274, -100, 286, -100, 1)
+obj = iDocument2D.ksLineSeg(286, -100, 310, 0, 1)
+obj = iDocument2D.ksLineSeg(310, 0, 298, 0, 1)
+obj = iDocument2D.ksLineSeg(298, 0, 274, -100, 1)
+obj = iDocument2D.ksLineSeg(274, -100, 310, 0, 2)
+obj = iDocument2D.ksLineSeg(286, -100, 298, 0, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 280, -100)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 20
+iExtrusionParam.depthReverse = 20
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:10"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(334, -100, 346, -100, 1)
+obj = iDocument2D.ksLineSeg(346, -100, 322, 0, 1)
+obj = iDocument2D.ksLineSeg(322, 0, 310, 0, 1)
+obj = iDocument2D.ksLineSeg(310, 0, 334, -100, 1)
+obj = iDocument2D.ksLineSeg(334, -100, 322, 0, 2)
+obj = iDocument2D.ksLineSeg(346, -100, 310, 0, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 340, -100)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 20
+iExtrusionParam.depthReverse = 20
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:11"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLineSeg(328, -48, 292, -48, 1)
+obj = iDocument2D.ksLineSeg(292, -48, 292, -60, 1)
+obj = iDocument2D.ksLineSeg(292, -60, 328, -60, 1)
+obj = iDocument2D.ksLineSeg(328, -60, 328, -48, 1)
+obj = iDocument2D.ksLineSeg(292, -48, 328, -60, 2)
+obj = iDocument2D.ksLineSeg(328, -48, 292, -60, 2)
+obj = iDocument2D.ksPoint(0, 0, 0)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 310, -48)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtMiddlePlane
+iExtrusionParam.depthNormal = 20
+iExtrusionParam.depthReverse = 20
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Boss extrusion:12"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()

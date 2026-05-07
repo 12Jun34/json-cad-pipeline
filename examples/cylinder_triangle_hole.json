@@ -1,0 +1,26 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "cylinder_triangle_hole",
+  "commands": [
+    {
+      "id": "main_cylinder",
+      "type": "create_cylinder",
+      "plane": "YOZ",
+      "center": [0, 0],
+      "radius": 30,
+      "depth": 80,
+      "extrude": "middle",
+      "select_point": [0, 30, 0]
+    },
+    {
+      "id": "triangle_hole",
+      "type": "cut_triangle",
+      "plane": "XOY",
+      "points": [[-22, 14], [22, 14], [0, -24]],
+      "depth": 100,
+      "extrude": "middle",
+      "select_point": [0, 14, 0]
+    }
+  ]
+}

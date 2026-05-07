@@ -1,0 +1,24 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "t_shape",
+  "commands": [
+    {
+      "id": "stem",
+      "type": "create_box",
+      "origin": [0, 0, 0],
+      "size": [100, 40, 20],
+      "plane": "YOZ",
+      "extrude": "middle"
+    },
+    {
+      "id": "top_bar",
+      "type": "create_box",
+      "origin": [0, 20, 0],
+      "size": [20, 40, 60],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 10, 0]
+    }
+  ]
+}

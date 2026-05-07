@@ -1,0 +1,54 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "primitives_demo",
+  "commands": [
+    {
+      "id": "base_plate",
+      "type": "create_box",
+      "origin": [0, 0, 0],
+      "size": [120, 20, 80],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, -40, 0]
+    },
+    {
+      "id": "triangle_prism",
+      "type": "create_triangle",
+      "plane": "YOZ",
+      "points": [[-15, -120], [-55, -120], [-35, -80]],
+      "depth": 30,
+      "extrude": "middle",
+      "select_point": [0, -35, -120]
+    },
+    {
+      "id": "round_boss",
+      "type": "create_cylinder",
+      "plane": "YOZ",
+      "center": [-35, -35],
+      "radius": 14,
+      "depth": 35,
+      "extrude": "middle",
+      "select_point": [0, -21, -35]
+    },
+    {
+      "id": "round_hole",
+      "type": "cut_cylinder",
+      "plane": "YOZ",
+      "center": [-60, -75],
+      "radius": 10,
+      "depth": 60,
+      "extrude": "middle",
+      "select_point": [0, -50, -75]
+    },
+    {
+      "id": "rectangular_cut",
+      "type": "cut_box",
+      "origin": [0, -10, -15],
+      "size": [25, 60, 20],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, -20, -15]
+    }
+  ]
+}

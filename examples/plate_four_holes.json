@@ -1,0 +1,56 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "plate_four_holes",
+  "commands": [
+    {
+      "id": "plate",
+      "type": "create_box",
+      "origin": [0, 0, 0],
+      "size": [200, 10, 200],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, -100, 0]
+    },
+    {
+      "id": "hole_bottom_left",
+      "type": "cut_cylinder",
+      "plane": "YOZ",
+      "center": [-15, -15],
+      "radius": 5,
+      "depth": 30,
+      "extrude": "middle",
+      "select_point": [0, -10, -15]
+    },
+    {
+      "id": "hole_bottom_right",
+      "type": "cut_cylinder",
+      "plane": "YOZ",
+      "center": [-185, -15],
+      "radius": 5,
+      "depth": 30,
+      "extrude": "middle",
+      "select_point": [0, -180, -15]
+    },
+    {
+      "id": "hole_top_left",
+      "type": "cut_cylinder",
+      "plane": "YOZ",
+      "center": [-15, -185],
+      "radius": 5,
+      "depth": 30,
+      "extrude": "middle",
+      "select_point": [0, -10, -185]
+    },
+    {
+      "id": "hole_top_right",
+      "type": "cut_cylinder",
+      "plane": "YOZ",
+      "center": [-185, -185],
+      "radius": 5,
+      "depth": 30,
+      "extrude": "middle",
+      "select_point": [0, -180, -185]
+    }
+  ]
+}

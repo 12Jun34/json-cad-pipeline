@@ -1,0 +1,29 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "six_point_star",
+  "commands": [
+    {
+      "id": "star_body",
+      "type": "create_prism",
+      "plane": "YOZ",
+      "points": [
+        [0, -60],
+        [-15, -26],
+        [-52, -30],
+        [-30, 0],
+        [-52, 30],
+        [-15, 26],
+        [0, 60],
+        [15, 26],
+        [52, 30],
+        [30, 0],
+        [52, -30],
+        [15, -26]
+      ],
+      "depth": 150,
+      "extrude": "middle",
+      "select_point": [0, 0, -60]
+    }
+  ]
+}

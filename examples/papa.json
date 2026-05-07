@@ -1,0 +1,115 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "papa_blocks",
+  "commands": [
+    {
+      "id": "p1_left",
+      "type": "create_box",
+      "origin": [0, 12, 0],
+      "size": [100, 20, 12],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 6, 0]
+    },
+    {
+      "id": "p1_right",
+      "type": "create_box",
+      "origin": [0, 60, 0],
+      "size": [100, 20, 12],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 54, 0]
+    },
+    {
+      "id": "p1_top",
+      "type": "create_box",
+      "origin": [0, 60, 0],
+      "size": [12, 20, 60],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 30, 0]
+    },
+    {
+      "id": "a1_left_slant",
+      "type": "create_prism",
+      "plane": "YOZ",
+      "points": [[94, -100], [106, -100], [130, 0], [118, 0]],
+      "depth": 40,
+      "extrude": "middle",
+      "select_point": [0, 100, -100]
+    },
+    {
+      "id": "a1_right_slant",
+      "type": "create_prism",
+      "plane": "YOZ",
+      "points": [[154, -100], [166, -100], [142, 0], [130, 0]],
+      "depth": 40,
+      "extrude": "middle",
+      "select_point": [0, 160, -100]
+    },
+    {
+      "id": "a1_crossbar",
+      "type": "create_box",
+      "origin": [0, 148, -48],
+      "size": [12, 40, 36],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 130, -48]
+    },
+    {
+      "id": "p2_left",
+      "type": "create_box",
+      "origin": [0, 192, 0],
+      "size": [100, 20, 12],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 186, 0]
+    },
+    {
+      "id": "p2_right",
+      "type": "create_box",
+      "origin": [0, 240, 0],
+      "size": [100, 20, 12],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 234, 0]
+    },
+    {
+      "id": "p2_top",
+      "type": "create_box",
+      "origin": [0, 240, 0],
+      "size": [12, 20, 60],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 210, 0]
+    },
+    {
+      "id": "a2_left_slant",
+      "type": "create_prism",
+      "plane": "YOZ",
+      "points": [[274, -100], [286, -100], [310, 0], [298, 0]],
+      "depth": 40,
+      "extrude": "middle",
+      "select_point": [0, 280, -100]
+    },
+    {
+      "id": "a2_right_slant",
+      "type": "create_prism",
+      "plane": "YOZ",
+      "points": [[334, -100], [346, -100], [322, 0], [310, 0]],
+      "depth": 40,
+      "extrude": "middle",
+      "select_point": [0, 340, -100]
+    },
+    {
+      "id": "a2_crossbar",
+      "type": "create_box",
+      "origin": [0, 328, -48],
+      "size": [12, 40, 36],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [0, 310, -48]
+    }
+  ]
+}

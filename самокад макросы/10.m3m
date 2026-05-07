@@ -1,0 +1,301 @@
+# -*- coding: utf-8 -*-
+#|10
+
+import pythoncom
+from win32com.client import Dispatch, gencache
+
+import LDefin2D
+import MiscellaneousHelpers as MH
+
+#  Подключим константы API Компас
+kompas6_constants = gencache.EnsureModule("{75C9F5D0-B5B8-4526-8681-9903C567D2ED}", 0, 1, 0).constants
+kompas6_constants_3d = gencache.EnsureModule("{2CAF168C-7961-4B90-9DA2-701419BEEFE3}", 0, 1, 0).constants
+
+#  Подключим описание интерфейсов API5
+kompas6_api5_module = gencache.EnsureModule("{0422828C-F174-495E-AC5D-D31014DBBE87}", 0, 1, 0)
+kompas_object = kompas6_api5_module.KompasObject(Dispatch("Kompas.Application.5")._oleobj_.QueryInterface(kompas6_api5_module.KompasObject.CLSID, pythoncom.IID_IDispatch))
+MH.iKompasObject  = kompas_object
+
+#  Подключим описание интерфейсов API7
+kompas_api7_module = gencache.EnsureModule("{69AC2981-37C0-4379-84FD-5DD2F3C0A520}", 0, 1, 0)
+application = kompas_api7_module.IApplication(Dispatch("Kompas.Application.7")._oleobj_.QueryInterface(kompas_api7_module.IApplication.CLSID, pythoncom.IID_IDispatch))
+MH.iApplication  = application
+
+
+Documents = application.Documents
+#  Получим активный документ
+kompas_document = application.ActiveDocument
+kompas_document_3d = kompas_api7_module.IKompasDocument3D(kompas_document)
+iDocument3D = kompas_object.ActiveDocument3D()
+
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeXOY)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLine(-19.388822578481, 0, 0)
+obj = iDocument2D.ksLine(-11.733055075538, -90, 0)
+obj = iDocument2D.ksLine(-30, -19.3427644275, 90)
+obj = iDocument2D.ksLine(0, -20.414571931203, 270)
+obj = iDocument2D.ksLine(-18.470130478128, -5, 0)
+obj = iDocument2D.ksLine(-22, -10, 90)
+obj = iDocument2D.ksLine(-8, -12.299457970166, 270)
+obj = iDocument2D.ksLine(-16.938976977539, -65, 0)
+obj = iDocument2D.ksLine(-12.957977876009, -85, 180)
+obj = iDocument2D.ksLine(-15, -34.348069486946, 90)
+obj = iDocument2D.ksLine(-18.776361178246, -45, 180)
+obj = iDocument2D.ksCircle(-15, -45, 7, 1)
+obj = iDocument2D.ksLine(-18.317015128069, -25, 0)
+obj = iDocument2D.ksLineSeg(-22, -5, -22, -25, 1)
+obj = iDocument2D.ksLineSeg(-22, -25, -8, -25, 1)
+obj = iDocument2D.ksLineSeg(-8, -25, -8, -5, 1)
+obj = iDocument2D.ksLineSeg(-8, -5, -22, -5, 1)
+obj = iDocument2D.ksLineSeg(-22, -65, -22, -85, 1)
+obj = iDocument2D.ksLineSeg(-22, -85, -8, -85, 1)
+obj = iDocument2D.ksLineSeg(-8, -85, -8, -65, 1)
+obj = iDocument2D.ksLineSeg(-8, -65, -22, -65, 1)
+obj = iDocument2D.ksLineSeg(-30, 0, 0, 0, 1)
+obj = iDocument2D.ksLineSeg(0, 0, 0, -90, 1)
+obj = iDocument2D.ksLineSeg(0, -90, -30, -90, 1)
+obj = iDocument2D.ksLineSeg(-30, -90, -30, 0, 1)
+iDefinition.EndEdit()
+iDefinition.angle = 180
+iSketch.Update()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(15, 0, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtNormal
+iExtrusionParam.depthNormal = 40
+iExtrusionParam.depthReverse = 0
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Элемент выдавливания:13"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLine(12.845292968104, 15, 0)
+obj = iDocument2D.ksLine(20, 28.467993491131, 90)
+obj = iDocument2D.ksLine(30, 31.746505106337, 90)
+obj = iDocument2D.ksLine(60, 31.746505106337, 90)
+obj = iDocument2D.ksLine(70, 32.987023014794, 90)
+obj = iDocument2D.ksLine(90, 33.784498813087, 90)
+obj = iDocument2D.ksLine(0, 35.113625143576, 90)
+obj = iDocument2D.ksLine(12.4022508605, 40, 180)
+obj = iDocument2D.ksLineSeg(0, 15, 20, 15, 1)
+obj = iDocument2D.ksLineSeg(20, 15, 30, 40, 1)
+obj = iDocument2D.ksLineSeg(30, 40, 60, 40, 1)
+obj = iDocument2D.ksLineSeg(60, 40, 70, 15, 1)
+obj = iDocument2D.ksLineSeg(70, 15, 90, 15, 1)
+obj = iDocument2D.ksLineSeg(90, 15, 90, -0.418352091494, 1)
+obj = iDocument2D.ksLineSeg(90, -0.418352091494, 0, -0.418352091494, 1)
+obj = iDocument2D.ksLineSeg(0, -0.418352091494, 0, 15, 1)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_cutExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 0, 7.290823954253)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iDefinition.cut = True
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtNormal
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 0
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Элемент выдавливания:14"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeYOZ)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLine(30, 29.318158577091, 90)
+obj = iDocument2D.ksLine(60, 21.875051126353, 90)
+obj = iDocument2D.ksLine(70, 26.925731182211, 90)
+obj = iDocument2D.ksLine(20, 28.2548575127, 90)
+obj = iDocument2D.ksLine(13.745467520848, 15, 0)
+obj = iDocument2D.ksLine(10.821389610664, 0, 0)
+obj = iDocument2D.ksLine(0, 10.178739418051, 90)
+obj = iDocument2D.ksLine(90, 10.355956262116, 90)
+obj = iDocument2D.ksLine(35.897572901033, 40, 180)
+obj = iDocument2D.ksLineSeg(0, 15, 20, 15, 1)
+obj = iDocument2D.ksLineSeg(20, 15, 30, 40, 1)
+obj = iDocument2D.ksLineSeg(30, 40, 45.154261128105, 45.133066302046, 1)
+obj = iDocument2D.ksLineSeg(45.154261128105, 45.133066302046, 60, 40, 1)
+obj = iDocument2D.ksLineSeg(60, 40, 70, 15, 1)
+obj = iDocument2D.ksLineSeg(70, 15, 90, 15, 1)
+obj = iDocument2D.ksLineSeg(90, 15, 90, 40, 1)
+obj = iDocument2D.ksLineSeg(90, 40, 45.154261128105, 53.331040947924, 1)
+obj = iDocument2D.ksLineSeg(45.154261128105, 53.331040947924, 0, 40, 1)
+obj = iDocument2D.ksLineSeg(0, 40, 0, 15, 1)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch = kompas_object.TransferInterface(iDefinition, kompas6_constants.ksAPI7Dual, 0)
+iSketch.LeftHandedCS = True
+iSketch.Update()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_cutExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(0, 37.577130564053, 42.566533151023)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iDefinition.cut = True
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtNormal
+iExtrusionParam.depthNormal = -30
+iExtrusionParam.depthReverse = 0
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Элемент выдавливания:15"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+iSketch = iPart.NewEntity(kompas6_constants_3d.o3d_sketch)
+iDefinition = iSketch.GetDefinition()
+iPlane = iPart.GetDefaultEntity(kompas6_constants_3d.o3d_planeXOY)
+iDefinition.SetPlane(iPlane)
+iSketch.Create()
+iDocument2D = iDefinition.BeginEdit()
+kompas_document_2d = kompas_api7_module.IKompasDocument2D(kompas_document)
+iDocument2D = kompas_object.ActiveDocument2D()
+
+obj = iDocument2D.ksLine(31.894861601156, -30, 180)
+obj = iDocument2D.ksLine(40.401270067147, -57, 180)
+obj = iDocument2D.ksLine(44.211432192538, -42, 180)
+obj = iDocument2D.ksLine(30, -37.5005148214, 270)
+obj = iDocument2D.ksLine(45, -34.487828472292, 270)
+obj = iDocument2D.ksLine(60, -33.778961096031, 270)
+obj = iDocument2D.ksLine(48.641853268575, -45, 180)
+obj = iDocument2D.ksLine(50.857063806594, -52, 180)
+obj = iDocument2D.ksCircle(45, -45, 7, 1)
+obj = iDocument2D.ksArcByPoint(45, -42, 15, 60, -42, 30, -42, -1, 1)
+obj = iDocument2D.ksLineSeg(30, -42, 30, -30, 1)
+obj = iDocument2D.ksLineSeg(30, -30, 60, -30, 1)
+obj = iDocument2D.ksLineSeg(60, -30, 60, -42, 1)
+iDefinition.EndEdit()
+iDefinition.angle = 90
+iSketch.Update()
+iPart7 = kompas_document_3d.TopPart
+iPart = iDocument3D.GetPart(kompas6_constants_3d.pTop_Part)
+
+obj = iPart.NewEntity(kompas6_constants_3d.o3d_bossExtrusion)
+iDefinition = obj.GetDefinition()
+iCollection = iPart.EntityCollection(kompas6_constants_3d.o3d_edge)
+iCollection.SelectByPoint(30, 45, 0)
+iEdge = iCollection.Last()
+iEdgeDefinition = iEdge.GetDefinition()
+iSketch = iEdgeDefinition.GetOwnerEntity()
+iDefinition.SetSketch(iSketch)
+iExtrusionParam = iDefinition.ExtrusionParam()
+iExtrusionParam.direction = kompas6_constants_3d.dtNormal
+iExtrusionParam.depthNormal = 10
+iExtrusionParam.depthReverse = 0
+iExtrusionParam.draftOutwardNormal = False
+iExtrusionParam.draftOutwardReverse = False
+iExtrusionParam.draftValueNormal = 0
+iExtrusionParam.draftValueReverse = 0
+iExtrusionParam.typeNormal = kompas6_constants_3d.etBlind
+iExtrusionParam.typeReverse = kompas6_constants_3d.etBlind
+iThinParam = iDefinition.ThinParam()
+iThinParam.thin = False
+obj.name = "Элемент выдавливания:16"
+iColorParam = obj.ColorParam()
+iColorParam.ambient = 0.5
+iColorParam.color = 9474192
+iColorParam.diffuse = 0.6
+iColorParam.emission = 0.5
+iColorParam.shininess = 0.8
+iColorParam.specularity = 0.8
+iColorParam.transparency = 1
+obj.Create()

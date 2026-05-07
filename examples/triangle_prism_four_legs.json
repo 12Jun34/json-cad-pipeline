@@ -1,0 +1,54 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "triangle_prism_four_legs",
+  "commands": [
+    {
+      "id": "main_triangle_prism",
+      "type": "create_triangle",
+      "plane": "YOZ",
+      "points": [[-20, 0], [-180, 0], [-100, -80]],
+      "depth": 80,
+      "extrude": "middle",
+      "select_point": [0, -100, 0]
+    },
+    {
+      "id": "left_cylinder_leg",
+      "type": "create_cylinder",
+      "plane": "YOZ",
+      "center": [-45, 38],
+      "radius": 9,
+      "depth": 60,
+      "extrude": "middle",
+      "select_point": [0, -36, 38]
+    },
+    {
+      "id": "right_cylinder_leg",
+      "type": "create_cylinder",
+      "plane": "YOZ",
+      "center": [-155, 38],
+      "radius": 9,
+      "depth": 60,
+      "extrude": "middle",
+      "select_point": [0, -146, 38]
+    },
+    {
+      "id": "left_triangle_leg",
+      "type": "create_triangle",
+      "plane": "YOZ",
+      "points": [[-72, 0], [-96, 0], [-84, 68]],
+      "depth": 55,
+      "extrude": "middle",
+      "select_point": [0, -84, 0]
+    },
+    {
+      "id": "right_triangle_leg",
+      "type": "create_triangle",
+      "plane": "YOZ",
+      "points": [[-104, 0], [-128, 0], [-116, 68]],
+      "depth": 55,
+      "extrude": "middle",
+      "select_point": [0, -116, 0]
+    }
+  ]
+}

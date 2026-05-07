@@ -1,0 +1,693 @@
+Ниже текст, который можно прямо закинуть в Codex как стартовый контекст. Я написал его так, чтобы Codex понял всю идею, архитектуру, текущую стадию и что делать дальше.
+
+Контекст проекта: СамоCAD / AI → JSON → макрос КОМПАС → модель
+
+Мы обсуждаем проект, цель которого — сделать систему, которая по текстовому описанию пользователя сможет создавать простые 3D-модели в КОМПАС-3D.
+
+Идея вдохновлена тем, как современные AI-агенты работают с внешними программами через tools/MCP: модель не должна сама быть CAD-ядром и не должна напрямую писать огромный нестабильный макрос. Вместо этого она должна понимать запрос пользователя, раскладывать его на понятные CAD-действия, а уже наша программа должна превращать эти действия в реальные команды КОМПАС-3D.
+
+Главная архитектурная идея:
+
+Промпт пользователя
+    ↓
+LLM
+    ↓
+JSON CAD-план
+    ↓
+валидатор
+    ↓
+генератор макроса / адаптер КОМПАС API
+    ↓
+КОМПАС-3D
+    ↓
+готовая модель
+
+На текущем этапе мы НЕ делаем полный AI-агент, НЕ делаем MCP, НЕ делаем работу с фотографиями или чертежами. Сейчас нужно сделать первый базовый слой:
+
+JSON-инструкция → макрос КОМПАС → модель
+
+То есть сначала вообще без AI. Сначала руками пишем JSON, потом наша программа генерирует из него макрос. Этот макрос запускается в КОМПАС и строит простую модель.
+
+Почему сначала JSON → макрос → модель
+
+Если сразу делать:
+
+Промпт → LLM → макрос → КОМПАС
+
+то будет много проблем:
+
+LLM может галлюцинировать методы API КОМПАС.
+LLM может путать синтаксис макросов.
+LLM может забывать обязательные параметры.
+LLM может делать операции в неправильном порядке.
+Будет непонятно, где ошибка: в понимании запроса, в JSON, в макросе, в API КОМПАС или в самой геометрии.
+
+Поэтому сначала нужно сделать стабильный “компилятор”:
+
+JSON CAD-план → макрос КОМПАС
+
+А уже потом LLM будет просто генератором входного JSON.
+
+То есть AI подключается позже:
+
+Промпт → LLM → JSON → валидатор → макрос → КОМПАС → модель
+Что нужно сделать первым
+
+Самый первый MVP должен быть максимально простым.
+
+Не надо сразу делать универсальную CAD-систему с командами create_sketch, draw_line, extrude, cut, fillet.
+
+Для самого первого шага достаточно одной высокоуровневой команды:
+
+create_plate
+
+Она должна создавать прямоугольную пластину по параметрам:
+
+width
+height
+thickness
+
+Пример задачи:
+
+Создать пластину 100×60×10 мм
+
+Первый JSON может выглядеть так:
+
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "simple_plate",
+  "commands": [
+    {
+      "id": "cmd_1",
+      "type": "create_part",
+      "name": "simple_plate"
+    },
+    {
+      "id": "cmd_2",
+      "type": "create_plate",
+      "width": 100,
+      "height": 60,
+      "thickness": 10
+    }
+  ]
+}
+
+Нужно написать программу, которая принимает такой JSON и генерирует макрос КОМПАС.
+
+Минимальная цель первого этапа
+
+Команда запуска:
+
+python src/main.py examples/plate.json
+
+Ожидаемый результат:
+
+Plan loaded: examples/plate.json
+Validation: OK
+Macro generated: artifacts/macros/simple_plate.py
+
+После выполнения должен появиться файл:
+
+artifacts/macros/simple_plate.py
+
+Сначала этот файл может быть псевдомакросом, но в идеале он должен стать реальным макросом, который строит пластину в КОМПАС-3D.
+
+Минимальная структура проекта
+
+Нужно создать примерно такую структуру:
+
+samocad_mvp/
+│
+├── examples/
+│   └── plate.json
+│
+├── artifacts/
+│   └── macros/
+│
+├── src/
+│   ├── main.py
+│   ├── validator.py
+│   ├── macro_generator.py
+│   └── __init__.py
+│
+└── README.md
+
+Пока не надо усложнять.
+
+Что должны делать файлы
+examples/plate.json
+
+Хранит входную JSON-инструкцию для тестовой детали.
+
+Пример:
+
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "simple_plate",
+  "commands": [
+    {
+      "id": "cmd_1",
+      "type": "create_part",
+      "name": "simple_plate"
+    },
+    {
+      "id": "cmd_2",
+      "type": "create_plate",
+      "width": 100,
+      "height": 60,
+      "thickness": 10
+    }
+  ]
+}
+src/main.py
+
+Точка входа.
+
+Должен:
+
+Принять путь к JSON-файлу из аргументов командной строки.
+Прочитать JSON.
+Вызвать валидатор.
+Вызвать генератор макроса.
+Сохранить макрос в artifacts/macros/.
+Вывести понятный результат в консоль.
+src/validator.py
+
+Проверяет JSON.
+
+На первом этапе валидатор должен проверять:
+
+version == "0.1"
+units == "mm"
+part_name существует
+commands существует и является списком
+есть ровно одна команда create_plate
+width > 0
+height > 0
+thickness > 0
+
+Если что-то не так, нужно выбрасывать понятную ошибку.
+
+Примеры ошибок:
+
+Only version 0.1 is supported
+Only mm units are supported
+commands must be a list
+Plan must contain exactly one create_plate command
+width must be a positive number
+height must be a positive number
+thickness must be a positive number
+src/macro_generator.py
+
+Берёт валидный JSON-план и создаёт текст макроса.
+
+На первом этапе может генерировать псевдомакрос:
+
+# Auto-generated KOMPAS macro
+# Part: simple_plate
+# Units: mm
+
+PART_NAME = "simple_plate"
+WIDTH = 100
+HEIGHT = 60
+THICKNESS = 10
+
+print("Creating plate:", PART_NAME, WIDTH, HEIGHT, THICKNESS)
+
+Но архитектурно нужно сделать так, чтобы потом можно было заменить этот шаблон на реальный макрос КОМПАС.
+
+Очень важный практический момент
+
+Перед тем как делать сложный генератор макросов, нужно получить один рабочий макрос КОМПАС вручную.
+
+То есть отдельно нужно решить задачу:
+
+Написать или найти минимальный рабочий макрос КОМПАС-3D,
+который создаёт пластину 100×60×10 мм.
+
+Это может быть Python/VBA/C#/любая поддерживаемая среда, в зависимости от того, как удобнее работать с КОМПАС API.
+
+Почему это важно:
+
+генератор макросов — это по сути подстановка параметров в уже рабочий шаблон.
+
+Сначала должен появиться рабочий шаблон:
+
+макрос, который всегда создаёт пластину 100×60×10
+
+Потом в нём числа заменяются на переменные:
+
+100 → {width}
+60 → {height}
+10 → {thickness}
+
+И получается:
+
+JSON → macro.py
+Правильная последовательность разработки
+Этап 1. JSON → псевдомакрос
+
+Сначала сделать программу, которая:
+
+читает JSON
+валидирует JSON
+генерирует текстовый macro.py
+
+Даже если macro.py пока не строит модель в КОМПАС.
+
+Цель этапа:
+
+python src/main.py examples/plate.json
+
+Результат:
+
+artifacts/macros/simple_plate.py
+Этап 2. Ручной рабочий макрос КОМПАС
+
+Отдельно сделать файл, например:
+
+manual_macros/create_simple_plate.py
+
+Он должен без JSON создавать пластину 100×60×10.
+
+Задача этапа — проверить связку:
+
+макрос → КОМПАС → модель
+
+Если этот макрос не работает, JSON пока не нужен.
+
+Этап 3. Подставить параметры из JSON в рабочий шаблон
+
+Когда есть ручной рабочий макрос, нужно перенести его в macro_generator.py и заменить фиксированные значения на параметры из JSON:
+
+width
+height
+thickness
+part_name
+
+После этого должно заработать:
+
+JSON → реальный макрос КОМПАС
+Этап 4. Ручной запуск сгенерированного макроса
+
+Сначала запускать макрос вручную в КОМПАС.
+
+Не надо сразу автоматизировать запуск.
+
+Цель:
+
+проверить, что artifacts/macros/simple_plate.py реально строит пластину
+Этап 5. Автоматический запуск
+
+Только потом добавить запуск макроса из Python или через COM/Automation:
+
+JSON → macro.py → автоматический запуск в КОМПАС → .m3d
+Этап 6. Добавить отверстия
+
+Когда пластина работает, добавить команду:
+
+create_hole
+
+Пример будущего JSON:
+
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "plate_with_hole",
+  "commands": [
+    {
+      "id": "cmd_1",
+      "type": "create_plate",
+      "width": 100,
+      "height": 60,
+      "thickness": 10
+    },
+    {
+      "id": "cmd_2",
+      "type": "create_hole",
+      "center": [50, 30],
+      "diameter": 8,
+      "depth": "through_all"
+    }
+  ]
+}
+
+Валидатор должен будет проверять:
+
+диаметр > 0
+центр отверстия внутри пластины
+диаметр не больше размеров пластины
+пластина создана до отверстия
+Этап 7. Только потом подключить LLM
+
+Когда работает:
+
+JSON → макрос → модель
+
+тогда подключить LLM:
+
+Промпт пользователя → LLM → JSON
+
+Например пользователь пишет:
+
+Создай пластину 100 на 60 мм, толщиной 10 мм, с отверстием 8 мм по центру.
+
+LLM должна вернуть JSON:
+
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "plate_with_center_hole",
+  "commands": [
+    {
+      "id": "cmd_1",
+      "type": "create_plate",
+      "width": 100,
+      "height": 60,
+      "thickness": 10
+    },
+    {
+      "id": "cmd_2",
+      "type": "create_hole",
+      "center": [50, 30],
+      "diameter": 8,
+      "depth": "through_all"
+    }
+  ]
+}
+Почему пока не надо делать MCP
+
+MCP имеет смысл только когда уже есть готовые инструменты:
+
+validate_plan
+dry_run_plan
+generate_macro
+execute_plan
+export_model
+
+Если этих функций ещё нет, MCP ничего не даст.
+
+Правильный порядок:
+
+1. JSON → валидатор
+2. JSON → макрос
+3. макрос → модель
+4. промпт → JSON
+5. только потом MCP
+
+MCP потом будет просто оболочкой, через которую AI сможет вызывать готовые функции.
+
+Например будущие tools:
+
+samocad.validate_plan
+samocad.dry_run_plan
+samocad.execute_plan
+samocad.export_model
+
+Но сейчас не надо это делать.
+
+Почему пока не надо обучать модель
+
+На этом этапе модель вообще не нужна.
+
+Позже можно будет взять готовую LLM, например Claude/GPT/Gemini/локальную модель, и заставить её возвращать JSON по нашей схеме.
+
+С нуля модель обучать не надо.
+
+Fine-tuning тоже не нужен на старте.
+
+Сначала нужно накопить данные:
+
+пользовательский запрос → правильный JSON
+
+И только потом думать о дообучении.
+
+Главные принципы архитектуры
+1. LLM не пишет макросы напрямую
+
+Плохой путь:
+
+Промпт → LLM → макрос КОМПАС
+
+Хороший путь:
+
+Промпт → LLM → JSON CAD-план → валидатор → макрос
+2. JSON — это промежуточный язык
+
+JSON должен быть простым, контролируемым и валидируемым.
+
+Сначала команды высокоуровневые:
+
+create_plate
+create_hole
+
+Потом можно перейти к более универсальным:
+
+create_sketch
+draw_rectangle
+extrude
+cut_extrude
+fillet
+chamfer
+3. Валидатор обязателен
+
+Нельзя доверять ни пользователю, ни LLM.
+
+Перед генерацией макроса нужно проверять:
+
+размеры
+единицы измерения
+порядок команд
+наличие обязательных полей
+геометрическую реализуемость
+4. Сначала простая пластина
+
+Не надо сразу поддерживать:
+
+сложные детали
+сборки
+фаски
+резьбы
+чертежи
+фото
+распознавание контуров
+MCP
+
+Первый успех:
+
+JSON с width/height/thickness → макрос → пластина в КОМПАС
+Пример минимального кода для первого этапа
+
+Можно начать с одного файла src/main.py, а потом разнести по модулям.
+
+import json
+from pathlib import Path
+
+
+def validate_plan(plan: dict) -> None:
+    if plan.get("version") != "0.1":
+        raise ValueError("Only version 0.1 is supported")
+
+    if plan.get("units") != "mm":
+        raise ValueError("Only mm units are supported")
+
+    if not plan.get("part_name"):
+        raise ValueError("part_name is required")
+
+    commands = plan.get("commands")
+    if not isinstance(commands, list):
+        raise ValueError("commands must be a list")
+
+    plate_commands = [cmd for cmd in commands if cmd.get("type") == "create_plate"]
+
+    if len(plate_commands) != 1:
+        raise ValueError("Plan must contain exactly one create_plate command")
+
+    cmd = plate_commands[0]
+
+    for field in ["width", "height", "thickness"]:
+        value = cmd.get(field)
+        if not isinstance(value, (int, float)) or value <= 0:
+            raise ValueError(f"{field} must be a positive number")
+
+
+def generate_macro(plan: dict) -> str:
+    part_name = plan["part_name"]
+    plate_cmd = next(cmd for cmd in plan["commands"] if cmd["type"] == "create_plate")
+
+    width = plate_cmd["width"]
+    height = plate_cmd["height"]
+    thickness = plate_cmd["thickness"]
+
+    return f'''# Auto-generated KOMPAS macro
+# Part: {part_name}
+# Units: mm
+
+PART_NAME = "{part_name}"
+WIDTH = {width}
+HEIGHT = {height}
+THICKNESS = {thickness}
+
+# TODO:
+# Здесь должен быть реальный код КОМПАС API:
+# 1. Создать документ детали
+# 2. Создать эскиз
+# 3. Нарисовать прямоугольник WIDTH x HEIGHT
+# 4. Выдавить на THICKNESS
+# 5. Сохранить модель
+
+print("Creating plate:", PART_NAME, WIDTH, HEIGHT, THICKNESS)
+'''
+
+
+def main():
+    import sys
+
+    if len(sys.argv) != 2:
+        print("Usage: python src/main.py examples/plate.json")
+        raise SystemExit(1)
+
+    input_path = Path(sys.argv[1])
+
+    with input_path.open("r", encoding="utf-8") as f:
+        plan = json.load(f)
+
+    print(f"Plan loaded: {input_path}")
+
+    validate_plan(plan)
+    print("Validation: OK")
+
+    macro_text = generate_macro(plan)
+
+    output_dir = Path("artifacts/macros")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = output_dir / f"{plan['part_name']}.py"
+    output_path.write_text(macro_text, encoding="utf-8")
+
+    print(f"Macro generated: {output_path}")
+
+
+if __name__ == "__main__":
+    main()
+Что нужно попросить Codex сделать сейчас
+
+Нужно попросить Codex не делать всё сразу, а начать с первого кирпича.
+
+Запрос к Codex:
+
+Мы делаем MVP проекта СамоCAD.
+
+Цель проекта: в будущем пользователь пишет текстовое описание детали, LLM превращает его в JSON CAD-план, а наша программа превращает JSON в макрос КОМПАС-3D и строит модель.
+
+Сейчас LLM, MCP и фотографии НЕ нужны.
+
+Первый этап: сделать путь JSON → валидатор → генератор макроса.
+
+Нужно реализовать минимальный проект:
+
+1. Структура:
+   - examples/plate.json
+   - artifacts/macros/
+   - src/main.py
+   - src/validator.py
+   - src/macro_generator.py
+   - README.md
+
+2. Поддержать JSON формата:
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "simple_plate",
+  "commands": [
+    {
+      "id": "cmd_1",
+      "type": "create_part",
+      "name": "simple_plate"
+    },
+    {
+      "id": "cmd_2",
+      "type": "create_plate",
+      "width": 100,
+      "height": 60,
+      "thickness": 10
+    }
+  ]
+}
+
+3. Валидатор должен проверять:
+   - version == "0.1"
+   - units == "mm"
+   - part_name существует
+   - commands является списком
+   - есть ровно одна команда create_plate
+   - width/height/thickness положительные числа
+
+4. Генератор макроса должен создать файл:
+   artifacts/macros/simple_plate.py
+
+5. Пока макрос может быть псевдомакросом с переменными:
+   PART_NAME
+   WIDTH
+   HEIGHT
+   THICKNESS
+
+6. CLI:
+   python src/main.py examples/plate.json
+
+7. Вывод:
+   Plan loaded: examples/plate.json
+   Validation: OK
+   Macro generated: artifacts/macros/simple_plate.py
+
+Важно:
+- Не подключать LLM.
+- Не делать MCP.
+- Не делать распознавание изображений.
+- Не пытаться сразу писать сложный КОМПАС API.
+- Сначала сделать чистый JSON → macro.py.
+- Код должен быть простым и расширяемым.
+Куда проект должен прийти позже
+
+После первого этапа развитие такое:
+
+1. JSON → псевдомакрос
+2. JSON → реальный макрос КОМПАС для пластины
+3. JSON → макрос с отверстием
+4. Промпт → LLM → JSON
+5. Автоматический запуск КОМПАС
+6. Экспорт модели
+7. MCP-сервер
+8. Работа с чертежами/фотографиями
+
+Но сейчас нужно не перескакивать.
+
+Текущая ближайшая цель:
+
+Сделать рабочий первый кирпич:
+examples/plate.json → artifacts/macros/simple_plate.py
+
+А потом отдельно добить:
+
+artifacts/macros/simple_plate.py → модель в КОМПАС
+Самая короткая формулировка проекта
+
+Мы строим не “нейросеть, которая пишет макросы”.
+
+Мы строим pipeline:
+
+человеческое описание
+→ структурированный CAD-план
+→ проверка
+→ макрос КОМПАС
+→ модель
+
+Первый этап без нейросети:
+
+JSON CAD-план
+→ проверка
+→ макрос
+
+Это фундамент всей системы.
