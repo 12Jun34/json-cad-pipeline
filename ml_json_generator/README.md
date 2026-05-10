@@ -48,6 +48,28 @@ test_sets/incremental_tasks.jsonl
 
 This is the preferred direction because complex CAD tasks become a sequence of smaller edits.
 
+### Planner mode
+
+The model first splits one large request into small steps, then the incremental builder executes those steps.
+
+```text
+user request -> planned steps -> current JSON + step -> updated JSON
+```
+
+Use:
+
+```python
+run_planned_incremental_request(...)
+```
+
+This mode decides how many model calls are needed:
+
+```text
+1 planner call + up to N builder attempts per planned step
+```
+
+Builder attempts stop as soon as a valid JSON is produced.
+
 ## Logging
 
 The older full-request mode appends logs to:
@@ -74,6 +96,19 @@ rejected_candidates.csv
 step_summary.csv
 task_summary.jsonl
 tasks/<task_id>.csv
+```
+
+The planner mode also creates a new folder per run:
+
+```text
+logs/planned_incremental_run_YYYYMMDD_HHMMSS/
+```
+
+It additionally stores:
+
+```text
+planned_task.json
+planned_tasks.jsonl
 ```
 
 Each task file is the most useful table for review:
