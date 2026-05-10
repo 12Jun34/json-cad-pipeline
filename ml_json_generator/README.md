@@ -70,6 +70,38 @@ This mode decides how many model calls are needed:
 
 Builder attempts stop as soon as a valid JSON is produced.
 
+Complex planner request table:
+
+```text
+test_sets/planned_complex_requests.csv
+test_sets/planned_complex_requests.jsonl
+```
+
+Each row contains:
+
+```text
+request_id
+part_name
+category
+level
+user_request
+expected_task_count
+expected_tasks_json
+tags
+```
+
+Batch runner:
+
+```python
+run_planned_request_file(...)
+```
+
+For each row it stores:
+
+```text
+request_id -> planned task -> task_001/task_002/... -> model attempts
+```
+
 ## Logging
 
 The older full-request mode appends logs to:

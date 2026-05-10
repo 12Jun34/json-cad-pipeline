@@ -404,7 +404,69 @@ task_summary.jsonl         - итог по задаче
 tasks/<task_id>.csv        - подробная таблица конкретной задачи
 ```
 
-## 15. Что сейчас важно оценить
+## 15. Таблица сложных запросов
+
+Для датасета добавлена таблица:
+
+```text
+ml_json_generator/test_sets/planned_complex_requests.csv
+```
+
+И такая же версия в JSONL:
+
+```text
+ml_json_generator/test_sets/planned_complex_requests.jsonl
+```
+
+В ней 100 сложных запросов. Каждая строка имеет структуру:
+
+```text
+request_id              - номер запроса: req_001, req_002, ...
+part_name               - имя детали
+category                - тип задачи: birdhouse, bracket, robot_head и т.д.
+level                   - уровень/режим: exact, relative, compact, conceptual, stretch
+user_request            - большой запрос пользователя
+expected_task_count     - ожидаемое количество маленьких задач
+expected_tasks_json     - пример правильного разбиения на task_001, task_002...
+tags                    - теги для фильтрации
+```
+
+Пример логики:
+
+```text
+request_id = req_001
+user_request = Make a birdhouse...
+
+planner создает:
+task_001 = Create the rectangular body.
+task_002 = Add a triangular roof on top.
+task_003 = Cut a round entrance hole on the front face.
+task_004 = Add a cylindrical perch below the entrance hole.
+```
+
+Потом builder выполняет эти задачи по очереди.
+
+Запуск файла:
+
+```python
+planned_file_result = run_planned_request_file(
+    PLANNED_REQUESTS_PATH,
+    limit=None,
+    attempt_limit=8,
+    max_steps=8,
+    use_expected_steps=False,
+)
+```
+
+Если нужно проверить не planner, а именно builder на готовом разбиении из таблицы:
+
+```python
+use_expected_steps=True
+```
+
+Тогда программа не просит модель разбивать запрос, а берет `expected_tasks_json` из таблицы.
+
+## 16. Что сейчас важно оценить
 
 Нужно смотреть не только `accepted`, но и причины ошибок.
 
