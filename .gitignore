@@ -14,6 +14,10 @@ models/
 *.pt
 *.pth
 
+!ml_json_generator/lora_adapters/
+!ml_json_generator/lora_adapters/**
+ml_json_generator/lora_adapters/**/*.gguf
+
 ml_json_generator/logs/
 ml_json_generator/generated/
 

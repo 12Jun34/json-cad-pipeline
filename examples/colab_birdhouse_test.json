@@ -1,0 +1,68 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "colab_birdhouse_test",
+  "commands": [
+    {
+      "id": "body",
+      "type": "create_box",
+      "size": [
+        60,
+        70,
+        30
+      ],
+      "placement": {
+        "origin": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "roof",
+      "type": "create_triangle",
+      "size": [
+        70,
+        28,
+        34
+      ],
+      "attach": {
+        "target": "body",
+        "face": "top",
+        "position": "center"
+      }
+    },
+    {
+      "id": "entrance_hole",
+      "type": "cut_cylinder",
+      "radius": 10,
+      "depth": "half",
+      "attach": {
+        "target": "body",
+        "face": "front",
+        "position": "center",
+        "offset": [
+          0,
+          12
+        ]
+      }
+    },
+    {
+      "id": "perch",
+      "type": "create_cylinder",
+      "radius": 4,
+      "depth": "half",
+      "extrude": "reverse",
+      "attach": {
+        "target": "body",
+        "face": "front",
+        "position": "center",
+        "offset": [
+          0,
+          -12
+        ]
+      }
+    }
+  ]
+}

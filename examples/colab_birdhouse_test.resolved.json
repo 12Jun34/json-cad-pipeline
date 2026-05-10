@@ -1,0 +1,88 @@
+{
+  "version": "0.1",
+  "units": "mm",
+  "part_name": "colab_birdhouse_test",
+  "commands": [
+    {
+      "id": "body",
+      "type": "create_box",
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        70,
+        30,
+        60
+      ],
+      "plane": "YOZ",
+      "extrude": "middle",
+      "select_point": [
+        0,
+        -30.0,
+        0
+      ]
+    },
+    {
+      "id": "roof",
+      "type": "create_triangle",
+      "plane": "YOZ",
+      "points": [
+        [
+          5.0,
+          0
+        ],
+        [
+          -65.0,
+          0
+        ],
+        [
+          -30.0,
+          28
+        ]
+      ],
+      "depth": 34,
+      "extrude": "middle",
+      "select_point": [
+        0,
+        -12.5,
+        14.0
+      ]
+    },
+    {
+      "id": "entrance_hole",
+      "type": "cut_cylinder",
+      "plane": "YOZ",
+      "center": [
+        -30.0,
+        -23.0
+      ],
+      "radius": 10,
+      "depth": 15.0,
+      "extrude": "normal",
+      "select_point": [
+        0,
+        -20.0,
+        -23.0
+      ]
+    },
+    {
+      "id": "perch",
+      "type": "create_cylinder",
+      "plane": "YOZ",
+      "center": [
+        -30.0,
+        -47.0
+      ],
+      "radius": 4,
+      "depth": 15.0,
+      "extrude": "reverse",
+      "select_point": [
+        0,
+        -26.0,
+        -47.0
+      ]
+    }
+  ]
+}
