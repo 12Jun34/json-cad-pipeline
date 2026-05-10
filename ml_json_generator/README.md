@@ -1,23 +1,93 @@
-# ML JSON generator
+# ML JSON Generator
 
-Черновой слой для схемы:
+This folder contains experiments for the path:
 
 ```text
-текст пользователя -> локальная LLM -> JSON -> validator.py -> исправление ошибок -> .m3m
+user request -> local LLM -> JSON CAD plan -> validator -> KOMPAS .m3m macro
 ```
 
-Файлы:
+## Main notebook
 
-- `json_repair_loop.ipynb` - локальный эксперимент внутри проекта.
-- `colab_json_repair_loop.ipynb` - версия для Google Colab: клонирует GitHub-репозиторий, скачивает модель и сохраняет результаты в Google Drive.
+Use:
 
-Идея "учится на ошибках" здесь реализована пока без дообучения весов:
+```text
+colab_json_repair_loop.ipynb
+```
 
-- модель генерирует JSON;
-- проектный валидатор проверяет JSON;
-- ошибка валидатора возвращается модели;
-- удачные и неудачные попытки сохраняются в `logs/json_repair_log.jsonl`;
-- удачные примеры можно подмешивать в следующие промпты и потом превратить в датасет для LoRA.
+It is designed for Google Colab with a T4 GPU.
 
-В ноутбуке используется локальная GGUF-модель через `llama-cpp-python`.
-Для T4 разумный первый вариант: `Qwen2.5-Coder-14B-Instruct-GGUF` в кванте `Q4_K_M`.
+## Modes
+
+### Full request mode
+
+The model receives one complete request and returns one complete JSON plan.
+
+```text
+request -> full JSON
+```
+
+Test file:
+
+```text
+test_requests.jsonl
+```
+
+### Incremental mode
+
+The model receives the current JSON plan plus one small instruction and returns the full updated JSON plan.
+
+```text
+current JSON + instruction -> updated JSON
+```
+
+Test file:
+
+```text
+test_sets/incremental_tasks.jsonl
+```
+
+This is the preferred direction because complex CAD tasks become a sequence of smaller edits.
+
+## Logging
+
+The older full-request mode appends logs to:
+
+```text
+logs/candidate_table.csv
+logs/accepted_candidates.csv
+logs/rejected_candidates.csv
+logs/test_summary.csv
+```
+
+The incremental mode creates a new folder per run:
+
+```text
+logs/incremental_run_YYYYMMDD_HHMMSS/
+```
+
+Inside it:
+
+```text
+all_candidates.csv
+accepted_candidates.csv
+rejected_candidates.csv
+step_summary.csv
+task_summary.jsonl
+tasks/<task_id>.csv
+```
+
+Each task file is the most useful table for review:
+
+```text
+request/instruction -> model answer -> accepted or error
+```
+
+## Human-readable flow
+
+See:
+
+```text
+PROGRAM_FLOW_RU.md
+```
+
+It explains the whole program step by step in Russian.
